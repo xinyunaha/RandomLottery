@@ -10,7 +10,7 @@ System:
   # 是否去重 true/false
   Dedupe: true
   # HTML生成路径 完整路径
-  HTMLPath: /var/www/html/lottery/index.html
+  HTMLPath: /var/www/html/lottery/template.html
 Database:
   # 本地数据库位置
   Path: ./test.db
