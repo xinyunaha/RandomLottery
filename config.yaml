@@ -1,0 +1,40 @@
+System:
+  # 从Excel导入 true/false
+  Excel: true
+  # 从数据库确认等级(SSPanel适用) true/false
+  Verify_Lv: true
+  # 数据库是否本地访问(强烈建议从本地打开) true/false
+  Database_Online: false
+  # 是否去重 true/false
+  Dedupe: true
+  # HTML生成路径 完整路径
+  HTMLPath: /var/www/html/lottery/index.html
+Database:
+  # 本地数据库位置
+  Path: ./test.db
+  # 主机地址
+  Host: 127.0.0.1
+  # 端口号
+  Port: 11451
+  # 用户名
+  Username: root
+  # 密码
+  Password: Fuck!DB123
+Excel:
+  # 文件路径
+  Path: ./user.xlsx
+  # 抽奖列(显示中奖值)，例如 A
+  Lottery_Column: B
+  # 抽奖行(显示中奖值)，例如 2
+  Lottery_Row: 2
+  # 权重列
+  Width_Column: D
+  # 权重行
+  Width_Row: 2
+Lottery:
+  # 自定义名称等级名称 ["特等奖"，"一等奖"]
+  Gifts_Lv_Str: ["特等奖","一等奖","二等奖","三等奖"]
+  # 奖品,与上一行对应 ["物品A","物品B"]
+  Gifts_Name: ["物品A","物品B","物品C","物品D"]
+  # 奖品数量,与上一行对应 [1,2]
+  Gifts_Num: [1,2,3,3]
