@@ -2,7 +2,6 @@ venv
 config.py
 *.pyc
 *.db
-index.html
 .idea/
 test.py
 user.xlsx
