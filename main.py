@@ -85,6 +85,8 @@ class Lottery:
             prefixSum.append(tmpSum)
         t = random.randint(0, tmpSum - 1)
         Winner = keyList[bisect.bisect_right(prefixSum, t)]
+        if self.config['System']['WinOnlyOnce']:
+            self.data.pop(Winner)
         return Winner
 
 

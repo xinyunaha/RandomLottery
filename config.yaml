@@ -1,4 +1,6 @@
 System:
+  # 单用户仅获奖一次 true/false
+  WinOnlyOnce: true
   # 从Excel导入 true/false
   Excel: true
   # 从数据库确认等级(SSPanel适用) true/false
