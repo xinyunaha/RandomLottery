@@ -10,7 +10,7 @@ System:
   # 是否去重 true/false
   Dedupe: true
   # HTML生成路径 完整路径
-  HTMLPath: /var/www/html/lottery/template.html
+  HTMLPath: /var/www/html/lottery/index.html
 Database:
   # 本地数据库位置
   Path: ./test.db
@@ -34,9 +34,15 @@ Excel:
   # 权重行
   Width_Row: 2
 Lottery:
-  # 自定义名称等级名称 ["特等奖"，"一等奖"]
-  Gifts_Lv_Str: ["特等奖","一等奖","二等奖","三等奖"]
-  # 奖品,与上一行对应 ["物品A","物品B"]
-  Gifts_Name: ["物品A","物品B","物品C","物品D"]
-  # 奖品数量,与上一行对应 [1,2]
-  Gifts_Num: [1,2,3,3]
+  - # 奖项名称
+    name: 一等奖
+    # 获奖人数
+    num: 1
+    # 奖品
+    gifts: 物品A
+  - # 奖项名称
+    name: 二等奖
+    # 获奖人数
+    num: 2
+    # 奖品
+    gifts: 物品B

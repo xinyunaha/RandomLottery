@@ -25,20 +25,12 @@ class Lottery:
         self.DatabaseClient = ''
 
     def Lottery(self):
-        gifts = {}
-        num = {}
-        for i in range(len(self.config['Lottery']['Gifts_Lv_Str'])):
-            gifts[self.config['Lottery']['Gifts_Lv_Str'][i]] = self.config['Lottery']['Gifts_Name'][i]
-            num[self.config['Lottery']['Gifts_Lv_Str'][i]] = self.config['Lottery']['Gifts_Num'][i]
-
-        for i in range(len(self.config['Lottery']['Gifts_Lv_Str'])):
-            _Lv = self.config['Lottery']['Gifts_Lv_Str'][i]
-            _Gifts = self.config['Lottery']['Gifts_Name'][i]
-            _GiftsNum = self.config['Lottery']['Gifts_Num'][i]
-            print(f'{_Lv}获奖名单:')
-            for i2 in range(_GiftsNum):
-                winner = self.GetWinner()
-                print(f'\t{winner}')
+        for i1 in range(len(self.config['Lottery'])):
+            _name = self.config['Lottery'][i1]['name']
+            _num = int(self.config['Lottery'][i1]['num'])
+            print(f'{_name}获奖名单:')
+            for i2 in range(int(_num)):
+                print(f'\t{self.GetWinner()}')
 
     def GetExcelData(self):
         if self.config['System']['Excel']:
