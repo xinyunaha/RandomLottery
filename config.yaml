@@ -3,6 +3,7 @@ System:
   WinOnlyOnce: true
   # 从Excel导入 true/false
   Excel: true
+  # Todo
   # 从数据库确认等级(SSPanel适用) true/false
   Verify_Lv: false
   # 数据库是否本地访问(强烈建议从本地打开) true/false
@@ -14,7 +15,7 @@ System:
   # HTML生成路径 完整路径
   HTMLPath: /var/www/html/lottery/index.html
   # 数据截止统计时间
-  EndTime: 2021-01-01 18:00:00
+  EndTime: 2020-12-17 18:00:00
   # 开奖时间
   DrawTime: 2020-12-17 12:00:00
 Database:
