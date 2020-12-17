@@ -74,7 +74,7 @@ class Lottery:
             a = LotteryRow
             b = WidthRow
             while True:
-                _user = sheet[f'{LotteryColumn}{a}'].value
+                _user = self.EncryptStr(sheet[f'{LotteryColumn}{a}'].value)
                 _width = sheet[f'{WidthColumn}{b}'].value
                 if _user is None or _width is None:
                     break
@@ -123,10 +123,11 @@ class Lottery:
             index.write(t1)
 
     def GetProbability(self):
+        data = self.GetExcelData()
         all_width = 0
         html_data = []
-        _user = list(self.data.keys())
-        _width = list(self.data.values())
+        _user = list(data.keys())
+        _width = list(data.values())
         for i in _width:
             all_width += i
         for i in range(len(_user)):
@@ -149,6 +150,22 @@ class Lottery:
             return True
         else:
             return False
+
+    def EncryptStr(self, data):
+        if self.config['System']['EncryptID']:
+            _data = str(data).split('@')
+            _list = list(_data[0])
+            _list[2] = "*"
+            _list[3] = "*"
+            if len(_data) == 1:
+                return "".join(_list)
+            else:
+                data = ''
+                for i in range(len(_data)-1):
+                    data += _data[i+1]
+                return "".join(_list)+'@'+data
+        else:
+            return data
 
 
 if __name__ == '__main__':
