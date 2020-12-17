@@ -6,8 +6,6 @@ import time
 
 import yaml
 import openpyxl
-
-
 def GetConfig():
     try:
         with open("./config.yaml", 'r', encoding='utf-8') as ymlfile:
@@ -74,7 +72,7 @@ class Lottery:
             a = LotteryRow
             b = WidthRow
             while True:
-                _user = self.EncryptStr(sheet[f'{LotteryColumn}{a}'].value)
+                _user = self.HideStr(sheet[f'{LotteryColumn}{a}'].value)
                 _width = sheet[f'{WidthColumn}{b}'].value
                 if _user is None or _width is None:
                     break
@@ -151,8 +149,8 @@ class Lottery:
         else:
             return False
 
-    def EncryptStr(self, data):
-        if self.config['System']['EncryptID']:
+    def HideStr(self, data):
+        if self.config['System']['HideUserID']:
             _data = str(data).split('@')
             _list = list(_data[0])
             _list[2] = "*"
