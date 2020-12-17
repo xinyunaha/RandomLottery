@@ -2,6 +2,8 @@
 # Created by xinyunaha on 2020-12-14 23:45
 import bisect
 import random
+import time
+
 import yaml
 import openpyxl
 
@@ -17,20 +19,45 @@ def GetConfig():
         exit()
 
 
+def toHtmlTable(data):
+    HtmlData = ''
+    for item in data:
+        HtmlData += '<tr>'
+        for i in range(len(item)):
+            if item[i] == item[-1]:
+                HtmlData += f'<td align="center">{item[i]}</td>'
+            else:
+                HtmlData += f'<td align="center">{item[i]}</td>'
+        HtmlData += '</tr>'
+    return HtmlData
+
+
 class Lottery:
     def __init__(self):
         self.config = GetConfig()
         self.data = self.GetExcelData()
+        self.GetProbability()
         self.Lottery()
-        self.DatabaseClient = ''
+        self.Winner = ''
 
     def Lottery(self):
-        for i1 in range(len(self.config['Lottery'])):
-            _name = self.config['Lottery'][i1]['name']
-            _num = int(self.config['Lottery'][i1]['num'])
-            print(f'{_name}获奖名单:')
-            for i2 in range(int(_num)):
-                print(f'\t{self.GetWinner()}')
+        isDrawTime = self.isDrawTime()
+        Html_data = []
+        if isDrawTime:
+            for data in self.config['Lottery']:
+                _name = data['lv_name']
+                _num = int(data['num'])
+                print(f'{_name}获奖名单:')
+                for i2 in range(int(_num)):
+                    _winner = self.GetWinner()
+                    print(f'\t{_winner}')
+                    items = [_name, _winner]
+                    Html_data.append(items)
+            self.Winner = toHtmlTable(Html_data)
+        else:
+            print('未到开奖时间')
+            self.Winner = '<tr><td>未到开奖时间</td></tr>'
+        self.ExportHtml()
 
     def GetExcelData(self):
         if self.config['System']['Excel']:
@@ -65,7 +92,6 @@ class Lottery:
             return data
         else:
             print('非Excel获取数据,退出')
-            exit()
 
     def GetWinner(self):
         keyList = list(self.data.keys())
@@ -80,6 +106,49 @@ class Lottery:
         if self.config['System']['WinOnlyOnce']:
             self.data.pop(Winner)
         return Winner
+
+    def ExportHtml(self):
+        print('抽奖完成,导出Html')
+        with open('./template.html', '+r', encoding='utf-8') as temp, open(self.config['System']['HTMLPath'], 'w+',
+                                                                           encoding='utf-8') as index:
+            template = temp.read()
+            # ToDo：替换
+            t1 = template\
+                .replace('%活动截止时间%', '{}'.format(self.config['System']['EndTime'])) \
+                .replace('%页面更新时间%', f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}') \
+                .replace('%公布结果时间%', '{}'.format(self.config['System']['DrawTime'])) \
+                .replace('%奖品设置%', f'{self.GetGifts()}')\
+                .replace('%概率公示%', f'{self.GetProbability()}') \
+                .replace('%开奖结果%', f'{self.Winner}')
+            index.write(t1)
+
+    def GetProbability(self):
+        all_width = 0
+        html_data = []
+        _user = list(self.data.keys())
+        _width = list(self.data.values())
+        for i in _width:
+            all_width += i
+        for i in range(len(_user)):
+            items = [_user[i], _width[i]]
+            html_data.append(items)
+        return toHtmlTable(html_data)
+
+    def GetGifts(self):
+        html_data = []
+        for i in self.config['Lottery']:
+            items = [i['lv_name'], i['gifts'], i['num']]
+            html_data.append(items)
+        return toHtmlTable(html_data)
+
+    def isDrawTime(self):
+        nowTime = time.time()
+        drawTime = time.mktime(self.config['System']['DrawTime'].timetuple())
+        print(nowTime, drawTime)
+        if nowTime >= drawTime:
+            return True
+        else:
+            return False
 
 
 if __name__ == '__main__':

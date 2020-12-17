@@ -11,6 +11,10 @@ System:
   Dedupe: true
   # HTML生成路径 完整路径
   HTMLPath: /var/www/html/lottery/index.html
+  # 数据截止统计时间
+  EndTime: 2021-01-01 18:00:00
+  # 开奖时间
+  DrawTime: 2020-12-17 12:00:00
 Database:
   # 本地数据库位置
   Path: ./test.db
@@ -34,14 +38,16 @@ Excel:
   # 权重行
   Width_Row: 2
 Lottery:
-  - # 奖项名称
-    name: 一等奖
+  -
+    # 奖项名称
+    lv_name: 一等奖
     # 获奖人数
     num: 1
     # 奖品
     gifts: 物品A
-  - # 奖项名称
-    name: 二等奖
+  -
+    # 奖项名称
+    lv_name: 二等奖
     # 获奖人数
     num: 2
     # 奖品
