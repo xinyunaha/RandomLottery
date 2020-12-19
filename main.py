@@ -4,8 +4,12 @@ import bisect
 import random
 import time
 
-import yaml
 import openpyxl
+import pymysql
+import pymysql.cursors
+import yaml
+
+
 def GetConfig():
     try:
         with open("./config.yaml", 'r', encoding='utf-8') as ymlfile:
@@ -34,14 +38,17 @@ class Lottery:
     def __init__(self):
         self.config = GetConfig()
         self.data = self.GetExcelData()
+        self.Winner = ''
+
+    def Main(self):
         self.GetProbability()
         self.Lottery()
-        self.Winner = ''
 
     def Lottery(self):
         isDrawTime = self.isDrawTime()
         Html_data = []
         if isDrawTime:
+            Html_data.append(['奖项', '获奖用户'])
             for data in self.config['Lottery']:
                 _name = data['lv_name']
                 _num = int(data['num'])
@@ -58,38 +65,54 @@ class Lottery:
         self.ExportHtml()
 
     def GetExcelData(self):
-        if self.config['System']['Excel']:
-            Path = self.config['Excel']['Path']
-            LotteryRow = self.config['Excel']['Lottery_Row']
-            LotteryColumn = self.config['Excel']['Lottery_Column']
-            WidthRow = self.config['Excel']['Width_Row']
-            WidthColumn = self.config['Excel']['Width_Column']
+        Path = self.config['Excel']['Path']
+        LotteryRow = self.config['Excel']['Lottery_Row']
+        LotteryColumn = self.config['Excel']['Lottery_Column']
+        WidthRow = self.config['Excel']['Width_Row']
+        WidthColumn = self.config['Excel']['Width_Column']
 
-            wb = openpyxl.load_workbook(Path)
-            names = wb.sheetnames
-            sheet = wb[names[0]]
-            data = {}
-            a = LotteryRow
-            b = WidthRow
-            while True:
-                _user = self.HideStr(sheet[f'{LotteryColumn}{a}'].value)
+        wb = openpyxl.load_workbook(Path)
+        names = wb.sheetnames
+        sheet = wb[names[0]]
+        data = {}
+        a = LotteryRow
+        b = WidthRow
+        while True:
+            _user = self.HideStr(sheet[f'{LotteryColumn}{a}'].value)
+            _width = None
+            if self.config['System']['ExcelWidth']:
                 _width = sheet[f'{WidthColumn}{b}'].value
-                if _user is None or _width is None:
-                    break
-                else:
-                    a += 1
-                    b += 1
-                if self.config['System']['Dedupe']:
-                    try:
-                        _ = data[_user]
-                        print('数据重复')
-                    except KeyError:
-                        data[_user] = _width
-                else:
+            else:
+                _width = self.UserWidth(sheet[f'{LotteryColumn}{a}'].value)
+            if _user is None or sheet[f'{WidthColumn}{b}'].value is None:
+                break
+            else:
+                a += 1
+                b += 1
+            if self.config['System']['Dedupe']:
+                try:
+                    _ = data[_user]
+                    print('数据重复')
+                except KeyError:
                     data[_user] = _width
-            return data
+            else:
+                data[_user] = _width
+        return data
+
+    def UserWidth(self, email):
+        width = self.config['System']['BaseWidth']
+        if self.config['System']['Verify_Lv']:
+            if self.config['System']['Lv_Width']:
+                try:
+                    userLv = DatabaseHelper().GetUserLv(email)
+                    for data in self.config['Width']:
+                        if userLv == data['lv']:
+                            width += data['add']
+                except DatabaseHelper.UserNotFoundException:
+                    pass
         else:
-            print('非Excel获取数据,退出')
+            print('不验证')
+        return width
 
     def GetWinner(self):
         keyList = list(self.data.keys())
@@ -107,15 +130,15 @@ class Lottery:
 
     def ExportHtml(self):
         print('抽奖完成,导出Html')
-        with open('./template.html', '+r', encoding='utf-8') as temp, open(self.config['System']['HTMLPath'], 'w+',
-                                                                           encoding='utf-8') as index:
+        with open('./template.html', '+r', encoding='utf-8') as temp, \
+                open(self.config['System']['HTMLPath'], 'w+', encoding='utf-8') as index:
             template = temp.read()
             # ToDo：替换
-            t1 = template\
+            t1 = template \
                 .replace('%活动截止时间%', '{}'.format(self.config['System']['EndTime'])) \
                 .replace('%页面更新时间%', f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}') \
                 .replace('%公布结果时间%', '{}'.format(self.config['System']['DrawTime'])) \
-                .replace('%奖品设置%', f'{self.GetGifts()}')\
+                .replace('%奖品设置%', f'{self.GetGifts()}') \
                 .replace('%概率公示%', f'{self.GetProbability()}') \
                 .replace('%开奖结果%', f'{self.Winner}')
             index.write(t1)
@@ -143,7 +166,6 @@ class Lottery:
     def isDrawTime(self):
         nowTime = time.time()
         drawTime = time.mktime(self.config['System']['DrawTime'].timetuple())
-        print(nowTime, drawTime)
         if nowTime >= drawTime:
             return True
         else:
@@ -159,12 +181,80 @@ class Lottery:
                 return "".join(_list)
             else:
                 data = ''
-                for i in range(len(_data)-1):
-                    data += _data[i+1]
-                return "".join(_list)+'@'+data
+                for i in range(len(_data) - 1):
+                    data += _data[i + 1]
+                return "".join(_list) + '@' + data
         else:
             return data
 
 
+class DatabaseHelper:
+    class Error(Exception):
+        def __init__(self, msg):
+            self.msg = msg
+
+        def __str__(self):
+            return self.msg
+
+    class UserNotFoundException(Error):
+        """
+        用户不存在
+        """
+        pass
+
+    def __init__(self):
+        self.config = GetConfig()['Database']
+        self.endTime = time.mktime(GetConfig()['System']['EndTime'].timetuple())
+        self.startTime = time.mktime(GetConfig()['System']['StartTime'].timetuple())
+        self.connect = pymysql.connect(self.config['Host'],
+                                       str(self.config['Username']),
+                                       str(self.config['Password']),
+                                       self.config['DBName'],
+                                       charset='utf8')
+        self.cursor = self.connect.cursor()
+
+    def GetUserID(self, email):
+        sql = f"select id from user where email='{email}' limit 1;"
+        self.cursor.execute(sql)
+        self.connect.commit()
+        userID = self.cursor.fetchone()
+        if userID is None:
+            raise self.UserNotFoundException('用户不存在')
+        else:
+            return userID[0]
+
+    def GetUserLv(self, email):
+        sql = f"select class from user where email='{email}' limit 1;"
+        self.cursor.execute(sql)
+        self.connect.commit()
+        lv = self.cursor.fetchone()
+        if lv is None:
+            raise self.UserNotFoundException('用户不存在')
+        else:
+            return lv[0]
+
+    def GetUserPay(self, email):
+        userid = self.GetUserID(email)
+        sql = f"select tradeno from paylist where userid='{userid}' and status=0;"
+        self.cursor.execute(sql)
+        self.connect.commit()
+        data = self.cursor.fetchall()
+        payAll = 0.00
+        for result in data:
+            if result[0] is None:
+                pass
+            else:
+                for pay in result:
+                    if self.endTime >= float(pay.split('UID')[0]) >= self.startTime:
+                        _sql = f"select total from paylist where tradeno='{pay}';"
+                        self.cursor.execute(_sql)
+                        self.connect.commit()
+                        total = self.cursor.fetchall()
+                        payAll += float(total[0][0])
+        return payAll
+
+
 if __name__ == '__main__':
-    Lottery()
+    # print(DatabaseHelper().GetUserLv('test01@test.com'))
+    # print(Lottery().GetExcelData())
+    Lottery().Main()

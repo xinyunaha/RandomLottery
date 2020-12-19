@@ -11,9 +11,9 @@ d = 0
 e = 0
 f = 0
 
-times = 10000000
+times = 1000000
 start_time = time.time()
-data = {'A': 50, 'B': 30, 'C': 20, 'D': 5, 'E': 1, 'F': 1}
+data = {'A': 50, 'B': 30, 'C': 20, 'D': 5, 'E': 1, 'F': 0}
 key_list = list(data.keys())
 value_list = [data[key] for key in key_list]
 for i in range(times):
@@ -52,9 +52,40 @@ print('D ->{}%'.format(round(data['D'] / all_width * 100, 3)))
 print('E ->{}%'.format(round(data['E'] / all_width * 100, 3)))
 print('F ->{}%'.format(round(data['F'] / all_width * 100, 3)))
 print('运行结果如下:')
-print(f'A ->{round((a / times) * 100, 3)}%')
-print(f'B ->{round((b / times) * 100, 3)}%')
-print(f'C ->{round((c / times) * 100, 3)}%')
-print(f'D ->{round((d / times) * 100, 3)}%')
-print(f'E ->{round((e / times) * 100, 3)}%')
-print(f'F ->{round((f / times) * 100, 3)}%')
+print(f'A -> {a}次\t{round((a / times) * 100, 3)}%')
+print(f'B -> {b}次\t{round((b / times) * 100, 3)}%')
+print(f'C -> {c}次\t{round((c / times) * 100, 3)}%')
+print(f'D -> {d}次\t{round((d / times) * 100, 3)}%')
+print(f'E -> {e}次\t{round((e / times) * 100, 3)}%')
+print(f'F -> {f}次\t{round((f / times) * 100, 3)}%')
+
+
+
+
+# import pymysql
+# import yaml
+#
+#
+# def GetConfig():
+#     try:
+#         with open("I://Python//RandomLottery//config.yaml", 'r', encoding='utf-8') as ymlfile:
+#             f = yaml.load_all(ymlfile, Loader=yaml.SafeLoader)
+#             for conf in f:
+#                 return conf
+#     except FileNotFoundError:
+#         print("未找到文件")
+#         exit()
+#
+#
+# class DatabaseHelper:
+#     def __init__(self):
+#         self.config = GetConfig()['Database']
+#         self.client = pymysql.connect(host=str(self.config['Host']),
+#                                       user=str(self.config['Username']),
+#                                       password=str(self.config['Password']),
+#                                       db=str(self.config['DBName']),
+#                                       charset='utf8',
+#                                       cursorclass=pymysql.cursors.DictCursor)
+#
+#
+# DatabaseHelper()

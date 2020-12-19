@@ -1,26 +1,33 @@
 System:
   # 单用户仅获奖一次 true/false
   WinOnlyOnce: true
-  # 从Excel导入 true/false
-  Excel: true
-  # Todo
+  # 从Excel导入权重(与BaseWidth冲突) true/false
+  ExcelWidth: false
+  # 每个用户的初始权重
+  BaseWidth: 1
   # 从数据库确认等级(SSPanel适用) true/false
-  Verify_Lv: false
-  # 数据库是否本地访问(强烈建议从本地打开) true/false
-  Database_Online: false
+  Verify_Lv: true
+  # 用户等级增加权重 true/false
+  Lv_Width: true
+  # 充值加权重 true/false
+  Pay_Width: true
+  # 充值多少金额才能加权重
+  Pay_total: 25
+  # 充值相应金额金额加权重的数量
+  Pay_Add: 1
   # 是否去重 true/false
   Dedupe: true
   # 显示的用户ID打码 true/false
   HideUserID: true
   # HTML生成路径 完整路径
   HTMLPath: /var/www/html/lottery/index.html
-  # 数据截止统计时间
+  # 数据统计开始时间
+  StartTime: 2014-12-17 18:00:00
+  # 数据统计截止时间
   EndTime: 2020-12-17 18:00:00
   # 开奖时间
   DrawTime: 2020-12-17 12:00:00
 Database:
-  # 本地数据库位置
-  Path: ./test.db
   # 主机地址
   Host: 127.0.0.1
   # 端口号
@@ -29,6 +36,18 @@ Database:
   Username: root
   # 密码
   Password: Fuck!DB123
+  # 数据库名
+  DBName: testdb
+Width:
+  -
+    #用户等级
+    lv: 1
+    # 增加的权重
+    add: 2
+  - #用户等级
+    lv: 2
+    # 增加的权重
+    add: 4
 Excel:
   # 文件路径
   Path: ./user.xlsx

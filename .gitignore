@@ -3,5 +3,6 @@ config.py
 *.pyc
 *.db
 .idea/
+test/
 index.html
 user.xlsx
