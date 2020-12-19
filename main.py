@@ -255,6 +255,4 @@ class DatabaseHelper:
 
 
 if __name__ == '__main__':
-    # print(DatabaseHelper().GetUserLv('test01@test.com'))
-    # print(Lottery().GetExcelData())
     Lottery().Main()
