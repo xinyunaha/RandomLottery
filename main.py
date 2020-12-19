@@ -39,7 +39,6 @@ class Lottery:
         self.config = GetConfig()
         self.data = self.GetExcelData()
         self.Winner = ''
-        print(self.data)
 
     def Main(self):
         self.GetProbability()
