@@ -68,23 +68,23 @@ class Lottery:
         Path = self.config['Excel']['Path']
         LotteryRow = self.config['Excel']['Lottery_Row']
         LotteryColumn = self.config['Excel']['Lottery_Column']
-        WidthRow = self.config['Excel']['Width_Row']
-        WidthColumn = self.config['Excel']['Width_Column']
+        WeightRow = self.config['Excel']['Weight_Row']
+        WeightColumn = self.config['Excel']['Weight_Column']
 
         wb = openpyxl.load_workbook(Path)
         names = wb.sheetnames
         sheet = wb[names[0]]
         data = {}
         a = LotteryRow
-        b = WidthRow
+        b = WeightRow
         while True:
             _user = self.HideStr(sheet[f'{LotteryColumn}{a}'].value)
-            _width = None
-            if self.config['System']['ExcelWidth']:
-                _width = sheet[f'{WidthColumn}{b}'].value
+            _weight = None
+            if self.config['System']['ExcelWeight']:
+                _weight = sheet[f'{WeightColumn}{b}'].value
             else:
-                _width = self.UserWidth(sheet[f'{LotteryColumn}{a}'].value)
-            if _user is None or sheet[f'{WidthColumn}{b}'].value is None:
+                _weight = self.UserWeight(sheet[f'{LotteryColumn}{a}'].value)
+            if _user is None or sheet[f'{WeightColumn}{b}'].value is None:
                 break
             else:
                 a += 1
@@ -94,25 +94,29 @@ class Lottery:
                     _ = data[_user]
                     print('数据重复')
                 except KeyError:
-                    data[_user] = _width
+                    data[_user] = _weight
             else:
-                data[_user] = _width
+                data[_user] = _weight
         return data
 
-    def UserWidth(self, email):
-        width = self.config['System']['BaseWidth']
-        if self.config['System']['Verify_Lv']:
-            if self.config['System']['Lv_Width']:
-                try:
-                    userLv = DatabaseHelper().GetUserLv(email)
-                    for data in self.config['Width']:
-                        if userLv == data['lv']:
-                            width += data['add']
-                except DatabaseHelper.UserNotFoundException:
-                    pass
-        else:
-            print('不验证')
-        return width
+    def UserWeight(self, email):
+        weight = self.config['System']['BaseWeight']
+        if self.config['System']['Lv_Weight']:
+            try:
+                userLv = DatabaseHelper().GetUserLv(email)
+                for data in self.config['Weight']:
+                    if userLv == data['lv']:
+                        weight += data['add']
+            except DatabaseHelper.UserNotFoundException:
+                pass
+        if self.config['System']['Pay_Weight']:
+            userPay = 0
+            try:
+                userPay = DatabaseHelper().GetUserPay(email)
+            except DatabaseHelper.UserNotFoundException:
+                pass
+            weight += int((userPay / self.config['System']['Pay_total']) * self.config['System']['Pay_Add'])
+        return weight
 
     def GetWinner(self):
         keyList = list(self.data.keys())
@@ -145,14 +149,14 @@ class Lottery:
 
     def GetProbability(self):
         data = self.GetExcelData()
-        all_width = 0
+        all_weight = 0
         html_data = []
         _user = list(data.keys())
-        _width = list(data.values())
-        for i in _width:
-            all_width += i
+        _weight = list(data.values())
+        for i in _weight:
+            all_weight += i
         for i in range(len(_user)):
-            items = [_user[i], round(_width[i] / all_width * 100, 3)]
+            items = [_user[i], round(_weight[i] / all_weight * 100, 3)]
             html_data.append(items)
         return toHtmlTable(html_data)
 
