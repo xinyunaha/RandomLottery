@@ -39,6 +39,7 @@ class Lottery:
         self.config = GetConfig()
         self.data = self.GetExcelData()
         self.Winner = ''
+        print(self.data)
 
     def Main(self):
         self.GetProbability()
@@ -152,7 +153,7 @@ class Lottery:
         for i in _width:
             all_width += i
         for i in range(len(_user)):
-            items = [_user[i], _width[i]]
+            items = [_user[i], round(_width[i] / all_width * 100, 3)]
             html_data.append(items)
         return toHtmlTable(html_data)
 
